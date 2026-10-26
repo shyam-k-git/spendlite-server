@@ -1,0 +1,25 @@
+# Dependencies and build output
+node_modules
+dist
+
+# Keep environment variables out of version control
+.env
+.env*.local
+
+# Generated Prisma Client
+/src/generated/prisma
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS and Editor files
+.DS_Store
+.vscode
+.idea
+
+# Tooling metadata
+.agents
+.claude
+.windsurf
+skills-lock.json
