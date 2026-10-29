@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import expenseRoutes from "./routes/expenseRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
+import paymentMethodRoutes from "./routes/paymentMethodRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
@@ -15,6 +16,7 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 app.use("/api/categories", categoryRoutes);
+app.use("/api/payment-methods", paymentMethodRoutes);
 app.use("/api/expenses", expenseRoutes);
 
 app.use((_req, res) => {

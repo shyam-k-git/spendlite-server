@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { z } from "zod";
-import { Prisma, type Expense, type Category } from "../generated/prisma/client.js";
+import { Prisma, type Expense, type Category, type PaymentMethod } from "../generated/prisma/client.js";
 import { prisma } from "../lib/prisma.js";
 import type { ExpenseResponse } from "../types/expense.js";
 import type { ApiErrorResponse } from "../types/api.js";
@@ -22,13 +22,17 @@ export const createExpenseSchema = z.object({
     ),
   date: z.iso.date(),
   categoryId: z.number().int().positive(),
+  paymentMethodId: z.number().int().positive().optional().nullable(),
 });
 
 export type CreateExpenseInput = z.infer<typeof createExpenseSchema>;
 
-type ExpenseWithCategory = Expense & { category: Category };
+type ExpenseWithRelations = Expense & {
+  category: Category;
+  paymentMethod: PaymentMethod | null;
+};
 
-function serializeExpense(expense: ExpenseWithCategory): ExpenseResponse {
+function serializeExpense(expense: ExpenseWithRelations): ExpenseResponse {
   return {
     id: expense.id,
     title: expense.title,
@@ -39,6 +43,13 @@ function serializeExpense(expense: ExpenseWithCategory): ExpenseResponse {
       id: expense.category.id,
       name: expense.category.name,
     },
+    paymentMethodId: expense.paymentMethodId ?? null,
+    paymentMethod: expense.paymentMethod
+      ? {
+          id: expense.paymentMethod.id,
+          name: expense.paymentMethod.name,
+        }
+      : null,
   };
 }
 
@@ -49,7 +60,7 @@ export async function getExpenses(
 ): Promise<void> {
   try {
     const expenses = await prisma.expense.findMany({
-      include: { category: true },
+      include: { category: true, paymentMethod: true },
       orderBy: [{ date: "desc" }, { id: "desc" }],
     });
 
@@ -77,10 +88,13 @@ export async function createExpense(
 
     const expense = await prisma.expense.create({
       data: {
-        ...parsed.data,
+        title: parsed.data.title,
+        amount: parsed.data.amount,
         date: new Date(`${parsed.data.date}T00:00:00.000Z`),
+        categoryId: parsed.data.categoryId,
+        paymentMethodId: parsed.data.paymentMethodId ?? null,
       },
-      include: { category: true },
+      include: { category: true, paymentMethod: true },
     });
 
     res.status(201).json(serializeExpense(expense));
@@ -89,7 +103,9 @@ export async function createExpense(
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2003"
     ) {
-      res.status(400).json({ error: "Selected category does not exist" });
+      res.status(400).json({
+        error: "Selected category or payment method does not exist",
+      });
       return;
     }
 

@@ -107,9 +107,22 @@ Base URL: `http://localhost:9000`
   ]
   ```
 
+### Payment Methods
+- **`GET /api/payment-methods`**
+  - Response `200 OK`: Array of payment method objects.
+  ```json
+  [
+    { "id": 1, "name": "Cash" },
+    { "id": 2, "name": "UPI" },
+    { "id": 3, "name": "Credit Card" },
+    { "id": 4, "name": "Debit Card" },
+    { "id": 5, "name": "Net Banking" }
+  ]
+  ```
+
 ### Expenses
 - **`GET /api/expenses`**
-  - Returns all recorded expenses ordered by date descending.
+  - Returns all recorded expenses ordered by date descending (including category and payment method joins).
   - Response `200 OK`: Array of expenses with relations.
   ```json
   [
@@ -119,23 +132,26 @@ Base URL: `http://localhost:9000`
       "amount": 250.00,
       "date": "2026-10-26",
       "categoryId": 1,
-      "category": { "id": 1, "name": "Food" }
+      "category": { "id": 1, "name": "Food" },
+      "paymentMethodId": 2,
+      "paymentMethod": { "id": 2, "name": "UPI" }
     }
   ]
   ```
 
 - **`POST /api/expenses`**
-  - Request Body:
+  - Request Body (`paymentMethodId` is optional):
     ```json
     {
       "title": "Groceries",
       "amount": 450.50,
       "date": "2026-10-26",
-      "categoryId": 1
+      "categoryId": 1,
+      "paymentMethodId": 3
     }
     ```
-  - Response `201 Created`: The newly created expense.
-  - Response `400 Bad Request`: Validation failure or category does not exist.
+  - Response `201 Created`: The newly created expense with relations.
+  - Response `400 Bad Request`: Validation failure or category/payment method does not exist.
 
 - **`DELETE /api/expenses/:id`**
   - Response `204 No Content`: Successfully deleted.

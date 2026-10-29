@@ -26,5 +26,12 @@ model Expense {
   date       DateTime @db.Date
   categoryId Int
   category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  paymentMethodId Int?
+  paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
 }
 
+model PaymentMethod {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique // e.g. "Cash", "UPI", "Credit Card", "Debit Card"
+  expenses Expense[]
+}

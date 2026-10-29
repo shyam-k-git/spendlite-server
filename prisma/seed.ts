@@ -22,7 +22,23 @@ async function main() {
     });
   }
 
-  console.log("Default categories seeded successfully.");
+  const paymentMethodNames = [
+    "Cash",
+    "UPI",
+    "Credit Card",
+    "Debit Card",
+    "Net Banking",
+  ];
+
+  for (const name of paymentMethodNames) {
+    await prisma.paymentMethod.upsert({
+      where: { name },
+      update: {},
+      create: { name },
+    });
+  }
+
+  console.log("Default categories and payment methods seeded successfully.");
 }
 
 main()

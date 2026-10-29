@@ -8,6 +8,9 @@
     "start": "node dist/server.js",
     "seed": "tsx prisma/seed.ts",
     "typecheck": "tsc --noEmit",
+    "migrate": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
+    "migrate:status": "prisma migrate status",
     "postinstall": "prisma generate"
   },
   "keywords": [],
